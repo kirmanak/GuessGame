@@ -1,0 +1,10 @@
+{% if options %}
+    <img src="/media/{{ image }}/" alt="Famous person photo" height="300">
+    <ul>
+        {% for i, option in options.items %}
+            <li><a href="/guess/{{ id }}/{{ i }}/">{{ option }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No images were found</p>
+{% endif %}

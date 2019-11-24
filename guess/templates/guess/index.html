@@ -1,0 +1,9 @@
+{% if difficulties %}
+    <ul>
+        {% for i, difficulty in difficulties.items %}
+            <li><a href="/guess/{{ i }}/">{{ difficulty }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No games are available.</p>
+{% endif %}
