@@ -6,7 +6,7 @@ from random import choice, sample
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
 from django.http import HttpResponse, HttpRequest
-from django.template import loader
+from django.shortcuts import render
 from requests import get, RequestException
 
 from .models import *
@@ -23,10 +23,8 @@ def index(request):
 
     logger.debug("Available difficulties " + str(difficulties))
 
-    template = loader.get_template('guess/index.html')
     context = {'difficulties': difficulties}
-
-    return HttpResponse(template.render(context, request))
+    return render(request, 'guess/index.html', context)
 
 
 def game(request, difficulty: int):
@@ -128,10 +126,8 @@ def create_game_page(request: HttpRequest, options: list, images: list) -> HttpR
     for button in list(options):
         buttons[int(button.id)] = str(button.name)
 
-    template = loader.get_template('guess/game.html')
     context = {'image': image.image, 'id': image.id, 'options': buttons}
-
-    return HttpResponse(template.render(context, request))
+    return render(request, 'guess/game.html', context)
 
 
 def save_images(answer: Answer, received_images):
