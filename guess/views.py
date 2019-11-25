@@ -36,7 +36,7 @@ def game(request, difficulty: int):
         difficulty_enum = Difficulty(difficulty)
     except ValueError:
         logger.exception("Failed to parse difficulty")
-        return HttpResponse("Unknown difficulty", status=400)
+        return send_error("Unknown difficulty", 400, request)
 
     answer, options = generate_game(difficulty_enum)
     logger.debug("Generated answer " + str(answer))
@@ -44,7 +44,7 @@ def game(request, difficulty: int):
     if answer is not None and options is not None:
         return play_game(answer, options, request)
     else:
-        return HttpResponse("There are no games with such a difficulty", status=404)
+        return send_error("There are no games with such a difficulty", 404, request)
 
 
 def check(request, image_id: int, answer_id: int):
@@ -57,6 +57,10 @@ def check(request, image_id: int, answer_id: int):
     if image is None or answer_id != image.answer_id:
         result = "You are wrong"
     return render(request, 'guess/check.html', {'result': result})
+
+
+def send_error(text: str, code: int, request: HttpRequest) -> HttpResponse:
+    return render(request, 'guess/error.html', {'text': text}, status=code)
 
 
 def load_images(name: str, ip: str):
@@ -120,7 +124,7 @@ def play_game(answer: Answer, options: list, request: HttpRequest) -> HttpRespon
             received_images = load_images(answer.name, get_client_ip(request))
         except TimeoutError:
             logger.exception("Failed to request data from Google")
-            return HttpResponse("No connection to Google", status=502)
+            return send_error("No connection to Google", 502, request)
 
         if received_images:
             logger.debug("Saving found images")
@@ -128,7 +132,7 @@ def play_game(answer: Answer, options: list, request: HttpRequest) -> HttpRespon
             return play_game(answer, options, request)
         else:
             logger.debug("Images not found")
-            return HttpResponse("There are no images for this person", status=500)
+            return send_error("There are no images for this person", 500, request)
 
 
 def create_game_page(request: HttpRequest, options: list, images: list) -> HttpResponse:
