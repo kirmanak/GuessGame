@@ -30,18 +30,28 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'file': {
+        'django_file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, "logs", 'debug.log')
+            'filename': os.path.join(BASE_DIR, "logs", 'django.log')
+        },
+        'views_file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, "logs", 'views.log')
         },
     },
     'loggers': {
         'django': {
-            'handlers': ['file'],
+            'handlers': ['django_file'],
             'level': 'DEBUG',
             'propagate': True,
         },
+        'views': {
+            'handlers': ['views_file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     },
 }
 
