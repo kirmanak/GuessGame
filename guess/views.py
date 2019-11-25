@@ -53,10 +53,10 @@ def check(request, image_id: int, answer_id: int):
     except Image.DoesNotExist:
         image = None
 
+    result = "You are correct"
     if image is None or answer_id != image.answer_id:
-        return HttpResponse("You are wrong", status=200)
-    else:
-        return HttpResponse("You are correct", status=200)
+        result = "You are wrong"
+    return render(request, 'guess/check.html', {'result': result})
 
 
 def load_images(name: str, ip: str):
