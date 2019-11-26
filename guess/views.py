@@ -8,13 +8,11 @@ from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render
-from requests import Session
 from requests_futures.sessions import FuturesSession
 
 from .models import *
 
 logger = logging.getLogger('views')
-session = FuturesSession(max_workers=40, session=Session())
 
 
 # Create your views here.
@@ -76,6 +74,7 @@ def load_images(name: str, ip: str):
     api_key = environ.get("SEARCH_API_KEY")
     engine_id = environ.get("SEARCH_ENGINE_ID")
     if api_key is None or engine_id is None:
+        logger.warning("API keys were not provided")
         return
 
     params = {'q': name, 'key': api_key, 'cx': engine_id, 'userIp': ip, 'prettyPrint': 'false', 'safe': 'active',
@@ -84,7 +83,10 @@ def load_images(name: str, ip: str):
     for i in range(1, 40, 10):
         params['start'] = i
 
-        result = session.get("https://www.googleapis.com/customsearch/v1", params=params).result(5)
+        with FuturesSession() as session:
+            future = session.get("https://www.googleapis.com/customsearch/v1", params=params)
+            result = future.result(5)
+
         if result.status_code != 200:
             logger.warning("Failed to load images " + result.text)
             break
@@ -125,22 +127,21 @@ def play_game(answer: Answer, options: list, request: HttpRequest) -> HttpRespon
     if images:
         logger.debug("Images are present in DB")
         return create_game_page(request, options, images)
+
+    logger.debug("Requesting new images")
+
+    try:
+        received_images = load_images(answer.name, get_client_ip(request))
+    except TimeoutError:
+        logger.exception("Failed to request data from Google")
+        return send_error("No connection to Google", 502, request)
+
+    if received_images:
+        save_images(answer, received_images)
+        return play_game(answer, options, request)
     else:
-        logger.debug("Requesting new images")
-
-        try:
-            received_images = load_images(answer.name, get_client_ip(request))
-        except TimeoutError:
-            logger.exception("Failed to request data from Google")
-            return send_error("No connection to Google", 502, request)
-
-        if received_images:
-            logger.debug("Saving found images")
-            save_images(answer, received_images)
-            return play_game(answer, options, request)
-        else:
-            logger.debug("Images not found")
-            return send_error("There are no images for this person", 500, request)
+        logger.debug("Images not found")
+        return send_error("There are no images for this person", 500, request)
 
 
 def create_game_page(request: HttpRequest, options: list, images: list) -> HttpResponse:
@@ -158,15 +159,18 @@ def handle_future(future):
     result = None
     try:
         result = future.result(5)
-    except TimeoutError as e:
-        logger.exception("Failed to load image: " + str(e))
+    except TimeoutError:
+        logger.warning("Failed to load image, timeout")
     return result
 
 
 def save_images(answer: Answer, received_images):
-    futures = list(map(lambda url: session.get(url), received_images))
-    responses = list(map(handle_future, futures))
-    logger.debug("Images are loaded")
+    logger.debug("Saving found images")
+    with FuturesSession(max_workers=40) as session:
+        futures = list(map(lambda url: session.get(url), received_images))
+        responses = list(map(handle_future, futures))
+
+    logger.debug("Images were loaded")
 
     for img in responses:
         if img is None or img.status_code != 200:
