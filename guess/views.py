@@ -110,9 +110,8 @@ def generate_game(difficulty):
     answers = Answer.objects.filter(difficulty__lte=difficulty)
 
     if answers:
-        answer = choice(answers)
-        options = sample(list(answers), 9)
-        options.append(answer)
+        options = sample(list(answers), 10)
+        answer = choice(options)
 
         return answer, options
     else:
