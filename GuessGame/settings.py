@@ -24,7 +24,7 @@ SECRET_KEY = 'hlmkl3s(+9o!plm=sdu9f6cdczc-10av5c5@$d_q7gu&s1wx!g'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["kirmanak.gq", "192.168.1.247", "127.0.0.1"]
+ALLOWED_HOSTS = ["kirmanak.gq", "192.168.1.247", "localhost"]
 
 LOGGING = {
     'version': 1,
