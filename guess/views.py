@@ -48,15 +48,24 @@ def game(request, difficulty: int):
 
 
 def check(request, image_id: int, answer_id: int):
+    image = None
     try:
         image = Image.objects.get(id=image_id)
     except Image.DoesNotExist:
-        image = None
+        logger.warning("Image not found")
 
     result = "You are correct"
     if image is None or answer_id != image.answer_id:
         result = "You are wrong"
-    return render(request, 'guess/check.html', {'result': result})
+
+    difficulty = None
+    try:
+        difficulty = int(Answer.objects.get(id=answer_id).difficulty)
+    except Answer.DoesNotExist:
+        logger.warning("Answer not found")
+
+    context = {'result': result, 'difficulty': difficulty}
+    return render(request, 'guess/check.html', context)
 
 
 def send_error(text: str, code: int, request: HttpRequest) -> HttpResponse:

@@ -1,1 +1,6 @@
 <p>{{ result }}</p>
+<a href="/guess/">Play again</a>
+
+{% if difficulty is not None %}
+    <a href="/guess/{{ difficulty }}/">Play again with same difficulty</a>
+{% endif %}
