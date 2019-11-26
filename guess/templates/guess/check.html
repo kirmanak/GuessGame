@@ -1,6 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Guess Game - Made by Kirill Kamakin & Pavel Pikalov</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+</head>
+<body>
 <p>{{ result }}</p>
 <a href="/guess/">Play again</a>
 
 {% if difficulty is not None %}
     <a href="/guess/{{ difficulty }}/">Play again with same difficulty</a>
 {% endif %}
+</body>
+</html>

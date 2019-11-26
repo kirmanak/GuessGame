@@ -1,3 +1,11 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Guess Game - Made by Kirill Kamakin & Pavel Pikalov</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+</head>
+<body>
 {% if difficulties %}
     <ul>
         {% for i, difficulty in difficulties.items %}
@@ -7,3 +15,5 @@
 {% else %}
     <p>No games are available.</p>
 {% endif %}
+</body>
+</html>

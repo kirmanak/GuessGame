@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Guess Game - Made by Kirill Kamakin & Pavel Pikalov</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+</head>
+<body>
 {% if options %}
     <img src="/media/{{ image }}/" alt="Famous person photo" height="300">
     <ul>
@@ -8,3 +15,5 @@
 {% else %}
     <p>No images were found</p>
 {% endif %}
+</body>
+</html>
